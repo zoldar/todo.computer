@@ -1,4 +1,4 @@
-{  
+{
   // DOM
   const script = document.currentScript;
   let canvas = document.getElementById('canvas');
@@ -15,7 +15,7 @@
     script.parentNode.after(spinner, script);
   }
   spinner.className = 'pending';
-  
+
   // Parse arguments from the URL address
   let url = new URL(script.src);
   if (!url.searchParams.has('g'))
@@ -24,6 +24,7 @@
   let uri = url.searchParams.get('g');
   let compat = url.searchParams.get('c');
   let version = url.searchParams.get('v');
+  let cacheVersion = new Number(url.searchParams.get('cv') || 1)
 
   if (uri == null)
     uri = 'nogame.love';
@@ -46,7 +47,7 @@
       window.runLove = () => {
         //state = 'loading';
         spinner.className = 'loading';
-        load(canvas, uri, arg, version, compat)
+        load(canvas, uri, arg, version, compat, cacheVersion)
           .then((res) => {
             canvas.style.display = 'block';
             canvas.focus();
@@ -62,7 +63,7 @@
             }
           });
       }
-      
+
       // Handling errors
       //window.alert = window.onerror = (msg) => {
       window.onerror = (msg) => {
@@ -75,7 +76,7 @@
 
       // Focus when running inside an iFrame
       window.onload = window.focus.bind(window);
-      
+
       // Handle touch and mouse input
       window.onclick = (e) => {
         window.focus();
@@ -94,13 +95,13 @@
         if (event.persisted)
           window.location.reload();
       };
-      
+
       if (!window.SharedArrayBuffer) {
         //alert('The Cross-Origin Policy is not configured properly');
         throw new Error('The Cross-Origin Policy is not configured properly');
         return;
       }
-      
+
       window.runLove();
     });
 };

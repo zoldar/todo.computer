@@ -1,10 +1,10 @@
-export default async (canvas, uri, arg, version, compat) => {
-  return new Promise(async (resolve, reject) => {      
+export default async (canvas, uri, arg, version, compat, cacheVersion) => {
+  return new Promise(async (resolve, reject) => {
     const fetchPkg = async () => {
       // Open the local database used to cache packages
       const db = await new Promise((resolve, reject) => {
         //const indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-        const req = indexedDB.open('EM_PRELOAD_CACHE', 1);
+        const req = indexedDB.open('EM_PRELOAD_CACHE', cacheVersion);
         req.onupgradeneeded = (event) => {
           const targ = event.target.result;
           if (targ.objectStoreNames.contains('PACKAGES'))
@@ -33,7 +33,7 @@ export default async (canvas, uri, arg, version, compat) => {
         });
         return await fetchPkg();
       }
-        
+
       // Check if there's a cached package, and if so whether it's the latest available
       let data = await new Promise((resolve, reject) => {
         const trans = db.transaction(['PACKAGES'], 'readonly');
@@ -77,11 +77,11 @@ export default async (canvas, uri, arg, version, compat) => {
       };
       return data;
     }
-    
+
     const data = await fetchPkg();
     if (!data)
       return reject('Could not parse the package contents');
-    
+
     const pkg = 'game.love'; //uri.substring(uri.lastIndexOf('/') + 1);
     let Module = {};
 
@@ -89,7 +89,7 @@ export default async (canvas, uri, arg, version, compat) => {
     Module.INITIAL_MEMORY = Math.min(4*data.length + 2e+7, mem);
     Module.canvas = canvas;
     Module.printErr = window.onerror;
-    
+
     Module.arguments = [pkg];
     if (arg && Array.isArray(arg))
       for (let i = 0; i < arg.length; i++)
